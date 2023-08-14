@@ -1,0 +1,36 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: keycloak
+  labels:
+    cloud.googleapis.com/location: asia-northeast1
+spec:
+  template:
+    metadata:
+      annotations:
+        run.googleapis.com/execution-environment: gen2
+        run.googleapis.com/cpu-throttling: 'false'
+        autoscaling.knative.dev/maxScale: '1'
+        autoscaling.knative.dev/minScale: '1'
+    spec:
+      containerConcurrency: 80
+      timeoutSeconds: 30
+      containers:
+        - image: asia-northeast1-docker.pkg.dev/ca-masem-test/any-container/jboss/keycloak:16.1.1
+          name: keycloak
+          ports:
+            containerPort: 8080
+          env:
+            - name: KEYCLOAK_USER
+              value: 'admin'
+            - name: KEYCLOAK_PASSWORD
+              value: 'admin'
+            - name: KEYCLOAK_FRONTEND_URL
+              value: 'https://auth.masemfordev.com/auth'
+          resources:
+            limits:
+              cpu: 4000m
+              memory: 2Gi
+  traffic:
+    - percent: 100
+      latestRevision: true

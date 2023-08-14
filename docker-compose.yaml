@@ -1,0 +1,43 @@
+version: '3'
+services:
+  keycloak:
+    image: jboss/keycloak:16.1.1
+    ports:
+      - "8080:8080"
+    environment:
+      - KEYCLOAK_USER=admin
+      - KEYCLOAK_PASSWORD=admin
+      - KEYCLOAK_FRONTEND_URL=http://localhost:8080/auth
+  envoy:
+    image: envoyproxy/envoy:v1.26-latest
+    ports:
+      - "9901:9901"
+      - "51051:51051"
+    command: ["-c", "/etc/envoy/envoy.yaml", "--service-cluster", "front-proxy"]
+    volumes:
+      - ./envoy/envoy-demo.yaml:/etc/envoy/envoy.yaml
+  opa-envoy:
+    image: openpolicyagent/opa:latest-envoy
+    ports:
+      - "9191:9191"
+    command:
+      - run
+      - --server
+      - --config-file=/opa.yaml
+      - --log-level=debug
+      - /policy.rego
+    volumes:
+      - ./opa/policy.rego:/policy.rego
+      - ./opa/opa.yaml:/opa.yaml
+  app:
+    image: demo-sidecar-app:v0.0.4
+    ports:
+      - "8090:8090"
+    environment:
+    - APP_NAME=backend
+    - APP_PORT=8090
+  front-app:
+    image: front-app:v0.0.3
+    ports:
+      - "3000:3000"
+    

@@ -1,0 +1,11 @@
+opa-envoy-plugin/
+.DS_Store
+.idea/
+
+terraform.tfstate
+terraform.tfstate.backup
+.terraform.lock.hcl
+.terraform/
+
+bundle/
+bundle.tar.gz
